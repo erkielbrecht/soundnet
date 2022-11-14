@@ -3,5 +3,4 @@ def txt_to_freq(text):
     for i in list(text):
         freq_list.append(ord(i)*10+400)
     return freq_list
-
-print(txt_to_freq(input()))
+    
