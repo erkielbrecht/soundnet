@@ -1,0 +1,6 @@
+{
+    "version" : "0.0.1",
+    "confirm_tone" : "1000",
+    "samplerate" : "44100",
+    "channels" : "1"
+}
