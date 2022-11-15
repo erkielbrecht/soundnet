@@ -1,0 +1,33 @@
+
+title = "soundnet"
+
+[main]
+"version" = "0.0.1"
+
+[sound]
+# Tone that indicates the start and the end of a message
+"confirm_tone" = 900
+# Tone that indicates the end of the header part
+"header_tone" = 800
+# Project samplerate
+"samplerate" = 44100
+# How many sound channels to use
+"channels" = 1
+# How many notes a second to play
+"tone_speed" = 0.2
+# How long should confirm tones last
+"confirm_speed" = 1
+# Expected recieve volume
+"r_volume" = 20
+
+[dictionary]
+# How many sounds per character
+partition_amount = 2
+# At which freq the tones start from
+tone_baseline = 1000
+# Step per tone
+tone_difference = 100
+
+[test_stream]
+# Recognition of the protocol type
+type_tone = 400

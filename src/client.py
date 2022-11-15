@@ -1,7 +1,6 @@
 import config
 import protocols.test_stream.client as ts_client
 import PySimpleGUI as sg
-import sound.stream as sound_stream
 
 def run():
     
@@ -14,15 +13,15 @@ def run():
                 ]
 
     #Create the Window
-    window = sg.Window('Soundnet '+config.get("version"), choose_layout, size=(300,300), element_justification='c')
+    window = sg.Window('Soundnet '+config.get("main","version"), choose_layout, size=(300,300), element_justification='c')
 
     #Client loop
     while True:
 
-        event, values = window.read(timeout=10)
+        event, values = window.read(timeout=100)
 
         if event == "Test stream":
-            new_window = sg.Window('Soundnet '+config.get("version"), ts_client.get_layout(), size=(300,300), element_justification='c', finalize=True)
+            new_window = sg.Window('Soundnet '+config.get("main","version"), ts_client.get_layout(), size=(300,300), element_justification='c', finalize=True)
             window.close()
             window = new_window
 
