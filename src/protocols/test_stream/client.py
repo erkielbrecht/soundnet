@@ -19,4 +19,5 @@ def listen(event, values, window):
     if event == 'Stop':
         sound_stream.end_stream()
     if event == 'Request':
-        ls.stream_listen()
+        em.emit('test_stream','123','123')
+        
