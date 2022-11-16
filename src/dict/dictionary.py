@@ -58,6 +58,17 @@ def txt_to_freq(text):
         freq_list += tone_lib[ord_adj(i)]
     return freq_list
 
+def artefact(text):
+    file = open("artefact.txt")
+    file.write(txt_to_freq(text))
+    file.close()
+
+def read_artefact():
+    file = open("artefact.txt")
+    x = freq_to_test(file.read())
+    file.close()
+    return x
+
 def freq_to_test(data):
     output = ""
     tone_lib = get_tone_lib()
