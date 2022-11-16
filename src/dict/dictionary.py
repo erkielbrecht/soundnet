@@ -1,5 +1,6 @@
 import math
 import config
+from collections import OrderedDict
 
 # Remove the ASSCII control characters.
 char_amount = 127-31
@@ -56,3 +57,17 @@ def txt_to_freq(text):
     for i in list(text):
         freq_list += tone_lib[ord_adj(i)]
     return freq_list
+
+def freq_to_test(data):
+    output = ""
+    tone_lib = get_tone_lib()
+    for i in range(int(len(data)/partition_amount)):
+        x = i*2
+        y = (i*2)+1
+        print(data[x:y+1])
+        try:
+            z = list(tone_lib.values()).index(data[x:y+1])
+            output += chr(list(tone_lib.keys())[z]+31)
+        except:
+            print("Recieved a wrong char")
+    return output
