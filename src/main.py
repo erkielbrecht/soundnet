@@ -12,7 +12,7 @@ def main():
                 [sg.Button('Client'), sg.Button('Server'), sg.Button('Exit')] ]
 
     #Create the Window
-    window = sg.Window('Soundnet '+config.get("version"), layout, size=(300,300), element_justification='c')
+    window = sg.Window('Soundnet '+config.get("main","version"), layout, size=(300,300), element_justification='c')
 
     while True:
         event, values = window.read()
@@ -31,4 +31,3 @@ def main():
             break
 
     window.close()
-    

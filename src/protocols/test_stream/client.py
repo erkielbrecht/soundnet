@@ -1,5 +1,7 @@
 import PySimpleGUI as sg
 import sound.stream as sound_stream
+import sound.emitter as em
+import sound.listener as ls
 
 def get_layout():
     return [
@@ -14,8 +16,8 @@ def init():
 
 def listen(event, values, window):
     window['-TEXT-'].update(sound_stream.get_current_input_hz())
-    print(sound_stream.get_current_input_hz())
     if event == 'Stop':
-            sound_stream.end_stream()
+        sound_stream.end_stream()
     if event == 'Request':
-        sound_stream.play_array([220,440,350,330,210,450,670,230,120,300,230,540,210,750,350,850,0,220,440,350,330,210,450,670,230,120,300,230,540,210,750,350,850,220,440,350,330,210,450,670,230,120,300,230,540,210,750,350,850,0,220,440,350,330,210,450,670,230,120,300,230,540,210,750,350,850], 0.1)
+        em.emit('test_stream','123','123')
+        

@@ -5,25 +5,41 @@ from threading import Thread
 import time
 
 #Getting the constants.
-SPS = int(conf.get("samplerate"))
-CHANNELS = int(conf.get("channels"))
+SPS = int(conf.get("sound","samplerate"))
+CHANNELS = int(conf.get("sound","channels"))
+R_VOLUME = conf.get("sound","r_volume")
 RUN = True
-ROUND_INPUT = -1
 
-#Funciton for retrieveing the current input hz.
+# Function for retrieveing the current input hz.
 def get_current_input_hz():
-    return round(current_hz, ROUND_INPUT)
+    if rec_vol > R_VOLUME:
+        return current_hz
+    else:
+        return 0
 
-#Play an array with interval t (Normal python list)
-def play_array(array, t):
-    #Thread for playing the array
+# Play the data
+def emit_data(c_tone, h_tone, t_tone, header, data, t, t_c):
+    # Thread for playing the array
+    print(t)
     def play_thread():
         global hz
-        for i in array:
+        hz=c_tone
+        print("playing_ctone")
+        time.sleep(t_c)
+        hz=t_tone
+        time.sleep(t_c)
+        for i in header:
             hz = i
             time.sleep(t)
+        hz=h_tone
+        time.sleep(t_c)
+        for i in data:
+            hz = i
+            time.sleep(t)
+        hz=c_tone
+        time.sleep(t_c)
         hz = 0
-    
+
     #Starting the playing thread
     x = Thread(target=play_thread)
     x.start()
@@ -58,11 +74,12 @@ def stream() -> None:
     #Callback function for the stream.
     def callback(indata, outdata, frames, time, status):
         nonlocal start_idx
-        global current_hz
+        global current_hz, rec_vol
 
         outdata[:] = generate_sine(start_idx, frames, hz)
 
         magnitude = np.abs(np.fft.rfft(indata[:, 0], n=SPS))
+        rec_vol = np.max(magnitude)
         current_hz = np.argmax(magnitude)
 
         start_idx += frames
@@ -81,4 +98,5 @@ def stream() -> None:
 #Base variables.      
 hz = 0
 current_hz = 0
-t = Thread(target=stream)
+rec_vol = 0
+t = Thread(target=stream)   
