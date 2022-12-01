@@ -1,10 +1,12 @@
 import time
-import sound.stream as stream
-import config
-import numpy as np
-import math
+from collections.abc import Callable
 from threading import Thread
+
+import numpy as np
+
+import config
 import dict.dictionary as dict
+import sound.stream as stream
 
 # Getting the constants.
 SPS = config.get("sound", "samplerate")
@@ -25,11 +27,11 @@ def extract_values(indata):
     return current_vol, round(current_hz, ROUND)
 
 
-def process_recording(record_data, record_time, c_tone, h_tone, t, t_c, p_list, callback_func):
+def process_recording(record_data, c_tone, h_tone, t, t_c, p_list, callback_func):
     data_list = []
     for i in record_data:
         vol, hz = extract_values(i[0])
-        data_list.append([hz, i[1]/SPS])
+        data_list.append([hz, i[1] / SPS])
 
     data_list_merged = [data_list[0]]
     for i in range(1, len(data_list)):
@@ -39,7 +41,6 @@ def process_recording(record_data, record_time, c_tone, h_tone, t, t_c, p_list, 
             data_list_merged.append(data_list[i])
 
     header_found = False
-    print(data_list_merged)
     for i in data_list_merged:
 
         if (i[0] != c_tone and
@@ -47,7 +48,7 @@ def process_recording(record_data, record_time, c_tone, h_tone, t, t_c, p_list, 
                 i[0] != 0 and
                 str(i[0]) not in p_list and
                 not header_found):
-            for j in range(int(round(round(i[1], 1) / (t), 0))):
+            for j in range(int(round(round(i[1], 1) / t, 0))):
                 header.append(i[0])
         if i[0] == h_tone and round(i[1], 0) == t_c:
             header_found = True
@@ -56,10 +57,8 @@ def process_recording(record_data, record_time, c_tone, h_tone, t, t_c, p_list, 
                 i[0] != 0 and
                 str(i[0]) not in p_list and
                 header_found):
-            for j in range(int(round(round(i[1], 1) / (t), 0))):
+            for j in range(int(round(round(i[1], 1) / t, 0))):
                 data.append(i[0])
-
-
 
     # data_list_cleaned = []
     # for i in data_list_merged:
@@ -124,21 +123,23 @@ def record(
         t_c,
         t,
         p_list,
-        callback_func):
+        callback_func,
+        callback):
+    callback("Starting recording.")
     stream.RECORDING = True
-    stream.timer = 0
     stream.sound_buffer = np.array([0])
 
     # Wait til the confirmation tone
     while stream.get_current_input_hz() != c_tone:
         time.sleep(0.1)
 
+    callback("Ending recording.")
     stream.RECORDING = False
-    record_time = stream.timer
     record_data = stream.q[:]
     stream.q = []
 
-    process_recording(record_data, record_time, c_tone, h_tone, t, t_c, p_list, callback_func)
+    process_recording(record_data, c_tone, h_tone, t, t_c, p_list, callback_func)
+    callback("Recording processed.")
 
 
 def streaming(
@@ -148,14 +149,15 @@ def streaming(
         t,
         time_out,
         perf_o,
-        callback_func):
+        callback_func,
+        callback):
     t_o = 0
     while stream.get_current_input_hz() != h_tone and t_o < time_out:
         header.append(stream.get_current_input_hz())
         time.sleep(t / perf_o)
         t_o += t
         if stream.get_current_input_hz() == h_tone:
-            print("Header recieved!")
+            callback("Header recieved!")
             time.sleep(t_c / perf_o)
             t_o = 0
             while stream.get_current_input_hz() != c_tone and t_o < time_out:
@@ -163,13 +165,13 @@ def streaming(
                 time.sleep(t / perf_o)
                 t_o += t
             if stream.get_current_input_hz() == c_tone:
-                print("Data recieved and message end!")
+                callback("Data recieved and message end!")
                 print(header, data)
                 print(dict.freq_to_test(header))
                 break
 
 
-def stream_listen(callback_func):
+def listen(callback_func: Callable, RECORD: bool = True, status_callback: Callable = None):
     global LISTENING
     LISTENING = True
 
@@ -181,6 +183,10 @@ def stream_listen(callback_func):
     perf_o = config.get("sound", "performance_overhead")
     p_list = config.get_cat("protocols").keys()
 
+    def callback(status):
+        if status_callback:
+            status_callback(status)
+
     def listener():
         global header, data, message_type, LISTENING
         header = []
@@ -189,20 +195,21 @@ def stream_listen(callback_func):
         while LISTENING:
             if stream.get_current_input_hz() == c_tone:
                 time.sleep(t_c / 2 / perf_o)
-                print("Got tone!")
+                callback("Found confirmation tone")
                 if stream.get_current_input_hz() == c_tone:
                     time.sleep(t_c / 2 / perf_o)
-                    print("Message confirmed!")
+                    callback("Confirmation tone confirmed!")
                     message_type = stream.get_current_input_hz()
-                    print("Message type recieved!")
-                    if int(round(message_type, ROUND)) == 400:
+                    callback("Message type recieved!")
+                    if RECORD:
                         record(
                             c_tone,
                             h_tone,
                             t_c,
                             t,
                             p_list,
-                            callback_func
+                            callback_func,
+                            callback
                         )
                     else:
                         time.sleep(t_c / perf_o)
@@ -213,10 +220,11 @@ def stream_listen(callback_func):
                             t,
                             time_out,
                             perf_o,
-                            callback_func
+                            callback_func,
+                            callback
                         )
                     stream.LISTENING = False
-                    break
+                    LISTENING = False
 
     # Starting the listening thread
     x = Thread(target=listener)

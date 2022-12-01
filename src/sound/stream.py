@@ -1,9 +1,11 @@
-import sounddevice as sd
-import numpy as np
-import config
-import queue
-from threading import Thread
 import time
+from collections.abc import Callable, Sized
+from threading import Thread
+
+import numpy as np
+import sounddevice as sd
+
+import config
 
 # Getting the constants.
 SPS = int(config.get("sound", "samplerate"))
@@ -50,10 +52,6 @@ def generate_sine(idx, frames, hz):
     wave = wave.reshape(-1, 1)
     return 0.2 * np.sin(2 * np.pi * hz * wave)
 
-def count_time(frames):
-    global timer
-    timer += frames / SPS
-
 
 # Thread that contains the audio stream.
 def stream_init() -> None:
@@ -66,14 +64,14 @@ def stream_init() -> None:
         nonlocal start_idx, current_frame
         global current_hz, current_vol, PLAYING, play_data
 
-        count_time(frames)
-
         if PLAYING:
             chunksize = min(len(play_data) - current_frame, frames)
             outdata[:chunksize] = play_data[current_frame:current_frame + chunksize]
             if chunksize < frames:
                 outdata[:] = 0
                 PLAYING = False
+                current_frame = 0
+                play_callback(None, None)
             current_frame += chunksize
 
         if EMITTING:
@@ -108,8 +106,8 @@ def stream_init() -> None:
 hz = 0
 current_hz = 0
 current_vol = 0
-play_data = 0
-timer = 0
+play_data: Sized = []
+play_callback: Callable = lambda *args: None
 
 q = []
 t = Thread(target=stream_init)

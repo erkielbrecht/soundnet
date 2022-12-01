@@ -1,18 +1,20 @@
-#Config module accesses values in the config.json folder
-import config
-#Client and server UI as seperate modules.
-import client
-import server
-#UI
+# Config module accesses values in the config.json folder
+# UI
 import PySimpleGUI as sg
 
-def main():
-    #First layout
-    layout = [  [sg.Text('Are you a client or a server?')],
-                [sg.Button('Client'), sg.Button('Server'), sg.Button('Exit')] ]
+# Client and server UI as seperate modules.
+import client
+import config
+import server
 
-    #Create the Window
-    window = sg.Window('Soundnet '+config.get("main","version"), layout, size=(300,300), element_justification='c')
+
+def main():
+    # First layout
+    layout = [[sg.Text('Are you a client or a server?')],
+              [sg.Button('Client'), sg.Button('Server'), sg.Button('Exit')]]
+
+    # Create the Window
+    window = sg.Window('Soundnet ' + config.get("main", "version"), layout, size=(300, 300), element_justification='c')
 
     while True:
         event, values = window.read()
@@ -27,7 +29,7 @@ def main():
             server.run()
             break
 
-        if event == sg.WIN_CLOSED or event == 'Exit': 
+        if event == sg.WIN_CLOSED or event == 'Exit':
             break
 
     window.close()
