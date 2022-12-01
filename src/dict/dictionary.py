@@ -59,13 +59,13 @@ def txt_to_freq(text):
     return freq_list
 
 def artefact(text):
-    file = open("artefact.txt")
-    file.write(txt_to_freq(text))
+    file = open("artefact.txt", 'w')
+    file.write(str(txt_to_freq(text)))
     file.close()
 
 def read_artefact():
     file = open("artefact.txt")
-    x = freq_to_test(file.read())
+    x = list(freq_to_test(file.read()))
     file.close()
     return x
 

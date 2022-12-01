@@ -2,6 +2,10 @@ import PySimpleGUI as sg
 import sound.stream as sound_stream
 import sound.emitter as em
 import sound.listener as ls
+import dict.dictionary as dc
+
+def callback(data, header):
+    print(data, header)
 
 def get_layout():
     return [
@@ -11,6 +15,9 @@ def get_layout():
         [sg.Text("0", key="-TEXT-")] 
     ]
 
+def callback(header, data):
+    print(header, data)
+
 def init():
     sound_stream.start_stream()
 
@@ -19,4 +26,5 @@ def listen(event, values, window):
     if event == 'Stop':
         sound_stream.end_stream()
     if event == 'Request':
-        ls.stream_listen()
+        em.emit('test_stream', '1234', '1234')
+        #ls.stream_listen(callback)
