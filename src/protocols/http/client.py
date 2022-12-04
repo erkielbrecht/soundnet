@@ -2,6 +2,7 @@ import PySimpleGUI as sg
 import webbrowser as wb
 import os
 import time
+from datetime import datetime
 
 import config
 import sound.emitter as em
@@ -50,8 +51,6 @@ def callback(header, data):
             file = open(f'assets/http/{ip}/head.txt', 'w')
             file.write(header)
 
-            print(header)
-
             # Extract the values from the header
             header = {i.split('=')[0]: i.split('=')[1] for i in header.split(';')}
 
@@ -73,20 +72,32 @@ def callback(header, data):
                     header_string += i+':', header[i]+'\n'
                 head_response = f'Headers for {ip}\n'+header_string
 
-        else:
+        elif header == 'DNS':
             http_status = f'Got an DNS response and requesting ip {data}!'
             if data:
                 ip = data
-                em.emit(callback,
-                        # The type of request
-                        'http',
-                        # Using the set method
-                        METHOD,
-                        # The user input
-                        ip,
-                        # Callback for client status
-                        status_callback=set_status
-                        )
+                os.mkdir(f'assets/http/{ip}')
+                if os.listdir(f'assets/http/{ip}'):
+                    file = open(f'assets/http/{ip}/head.txt')
+                    header = {i.split('=')[0]: i.split('=')[1] for i in file.read().split(';')}
+                    header['Files'] = header['Files'].split(' ')
+                    file.close()
+                    if 'Expires' in header:
+                        if datetime.now().replace(second=0, microsecond=0) <= datetime.strptime(header['Expires'],
+                                                                                                "%Y-%m-%d %H:%M"):
+                            wb.open('file://' + os.path.abspath(f'assets/http/{ip}/' + header['Files'][0]), new=2)
+
+                        else:
+                            em.emit(callback,
+                                    # The type of request
+                                    'http',
+                                    # Using the set method
+                                    METHOD,
+                                    # The user input
+                                    ip,
+                                    # Callback for client status
+                                    status_callback=set_status
+                                    )
             else:
                 http_status = 'Sorry but the requested webpage could not be found.'
 

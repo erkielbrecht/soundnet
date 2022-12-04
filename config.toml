@@ -52,6 +52,8 @@ type_tone = 500
 list_type = "record"
 # Time to wait before emitting message
 wait_time = 1
+# How long until a website expires (Minutes)
+expire = 2
 
 
 [dns]

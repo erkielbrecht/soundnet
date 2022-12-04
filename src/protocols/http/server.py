@@ -1,5 +1,7 @@
 import os
 import time
+from datetime import datetime, timedelta
+
 import config
 
 
@@ -14,10 +16,11 @@ def callback(header, data, server_listen, server_emit):
             data_data = ''
             for i in files:
                 file = open(f'assets/http/server/{data}/{i}')
-                data_data += file.read()+';'
+                data_data += file.read() + ';'
                 file.close()
 
-            header_data = open(f'assets/http/server/{data}/header.txt').read()
+            header_data = open(f'assets/http/server/{data}/header.txt').read() + ';Expires=' + str(
+                datetime.now().replace(second=0, microsecond=0) + timedelta(minutes=int(config.get('http', 'expire'))))
 
             server_emit('http', header_data, data_data)
         elif header == 'HEAD':

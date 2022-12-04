@@ -3,7 +3,7 @@ import math
 import config
 
 # Remove the ASSCII control characters.
-char_amount = 127 - 31
+char_amount = 127
 
 # Constants
 
@@ -50,7 +50,7 @@ def get_tone_lib():
 
 # Adjusted ord function
 def ord_adj(char):
-    return ord(char) - 31
+    return ord(char)
 
 
 # Make text to an array of frequencies.
@@ -85,7 +85,7 @@ def freq_to_test(data):
         print(data[x:y + 1])
         try:
             z = list(tone_lib.values()).index(data[x:y + 1])
-            output += chr(list(tone_lib.keys())[z] + 31)
+            output += chr(list(tone_lib.keys())[z])
         except:
             print("Recieved a wrong char")
     return output
