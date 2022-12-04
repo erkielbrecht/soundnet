@@ -1,7 +1,9 @@
 import PySimpleGUI as sg
 import webbrowser as wb
 import os
+import time
 
+import config
 import sound.emitter as em
 import sound.listener as ls
 import sound.stream as sound_stream
@@ -38,6 +40,7 @@ def callback(header, data):
     if not header and not data:
         http_status = 'Starting listening.'
         # Listening.
+        time.sleep(0.2)
         ls.listen(callback, status_callback=set_status)
     else:
         if header != 'DNS':
@@ -47,18 +50,21 @@ def callback(header, data):
             file = open(f'assets/http/{ip}/head.txt', 'w')
             file.write(header)
 
+            print(header)
+
             # Extract the values from the header
-            header = {i[0]: i[1] for i in header.split(';')}
+            header = {i.split('=')[0]: i.split('=')[1] for i in header.split(';')}
 
             if data:
                 http_status = 'Received a response with a body.'
                 data = data.split(';')
                 header['Files'] = header['Files'].split(' ')
+                print(header)
                 for j, i in enumerate(header['Files']):
                     file = open(f'assets/http/{ip}/'+i, 'w')
                     file.write(data[j])
                     file.close()
-                wb.open('file://'+os.path.abspath(header['Files'][0]), new=2)
+                wb.open('file://'+os.path.abspath(f'assets/http/{ip}/'+header['Files'][0]), new=2)
 
             else:
                 http_status = 'Received a bodiless response.'

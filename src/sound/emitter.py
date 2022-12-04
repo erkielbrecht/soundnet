@@ -24,6 +24,7 @@ def emit(callback_func: Callable, type: str, header: str, data: str, LIVE: bool 
     # Convert data to frequencies.
     data = dict.txt_to_freq(data)
     header = dict.txt_to_freq(header)
+    print(header, data)
 
     def callback(status):
         if status_callback:

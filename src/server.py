@@ -6,6 +6,7 @@ import sound.listener as ls
 from sound.stream import end_stream, start_stream
 
 import protocols.http.server as http_server
+import protocols.dns.dns_resolver as dns_resolver
 
 status = ''
 protocol_type = ''
@@ -30,6 +31,8 @@ def callback(header, data):
     if header and data:
         if protocol_type == 'http':
             http_server.callback(header, data, server_listen, server_emit)
+        if protocol_type == 'dns':
+            dns_resolver.callback(header, data, server_listen, server_emit)
     else:
         ls.listen(callback_func=callback, status_callback=set_status, server_type_callback=set_type)
 

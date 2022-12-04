@@ -1,7 +1,10 @@
 import os
+import time
+import config
 
 
 def callback(header, data, server_listen, server_emit):
+    time.sleep(float(config.get('http', 'wait_time')))
     ips = os.listdir('assets/http/server')
     if data in ips:
         if header == 'GET':

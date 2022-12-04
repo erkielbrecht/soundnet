@@ -26,6 +26,7 @@ def main():
 
         if event == "Server":
             window.close()
+            server.init()
             server.run()
             break
 

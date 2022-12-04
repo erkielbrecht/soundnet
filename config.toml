@@ -14,11 +14,11 @@ title = "soundnet"
 # How many sound channels to use
 "channels" = 1
 # How many notes a second to play
-"tone_speed" = 0.03
+"tone_speed" = 0.1
 # How long should confirm tones last
 "confirm_speed" = 1
 # Expected recieve volume
-"r_volume" = 10
+"r_volume" = 5
 # Seconds until listening times out
 "time_out" = 20
 # Performance multiplier (Must be calibrated per computer)
@@ -50,9 +50,14 @@ list_type = "record"
 type_tone = 500
 # Listening type (streaming, record)
 list_type = "record"
+# Time to wait before emitting message
+wait_time = 1
+
 
 [dns]
 # Recognition of the protocol type
 type_tone = 600
 # Listening type (streaming, record)
 list_type = "record"
+# Time to wait before emitting message
+wait_time = 1

@@ -178,7 +178,6 @@ def listen(callback_func: Callable, RECORD: bool = True, status_callback: Callab
            server_type_callback: Callable = lambda *args: None):
     global LISTENING
     LISTENING = True
-    print('rfkmferokmfeo')
 
     c_tone = int(config.get("sound", "confirm_tone"))
     h_tone = int(config.get("sound", "header_tone"))
@@ -203,7 +202,7 @@ def listen(callback_func: Callable, RECORD: bool = True, status_callback: Callab
                 time.sleep(t_c / 2 / perf_o)
                 callback("Found confirmation tone")
                 if stream.get_current_input_hz() == c_tone:
-                    time.sleep(t_c / 2 / perf_o)
+                    time.sleep(t_c / perf_o)
                     callback("Confirmation tone confirmed!")
                     message_type = stream.get_current_input_hz()
                     callback("Message type recieved!")
@@ -219,7 +218,7 @@ def listen(callback_func: Callable, RECORD: bool = True, status_callback: Callab
                             callback
                         )
                     else:
-                        time.sleep(t_c / perf_o)
+                        time.sleep(t_c / 2 / perf_o)
                         streaming(
                             c_tone,
                             h_tone,
