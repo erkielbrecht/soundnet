@@ -153,7 +153,8 @@ def streaming(
         time_out,
         perf_o,
         callback_func,
-        callback):
+        callback,
+        partition):
     t_o = 0
     while stream.get_current_input_hz() != h_tone and t_o < time_out:
         header.append(stream.get_current_input_hz())
@@ -163,14 +164,20 @@ def streaming(
             callback("Header recieved!")
             time.sleep(t_c / perf_o)
             t_o = 0
+            callback_func(dict.freq_to_test(header), '')
+            current_data = []
+            counter = 0
             while stream.get_current_input_hz() != c_tone and t_o < time_out:
-                data.append(stream.get_current_input_hz())
+                current_data.append(stream.get_current_input_hz())
+                counter += 1
+                if counter == partition:
+                    callback_func('', dict.freq_to_test(current_data))
+                    current_data = []
                 time.sleep(t / perf_o)
                 t_o += t
             if stream.get_current_input_hz() == c_tone:
                 callback("Data recieved and message end!")
-                print(header, data)
-                print(dict.freq_to_test(header))
+                callback_func('END', '')
                 break
 
 
@@ -186,6 +193,7 @@ def listen(callback_func: Callable, RECORD: bool = True, status_callback: Callab
     time_out = config.get("sound", "time_out")
     perf_o = config.get("sound", "performance_overhead")
     p_list = config.get_cat("protocols").keys()
+    partition = config.get('dictionary', 'partition_amount')
 
     def callback(status):
         if status_callback:
@@ -202,7 +210,7 @@ def listen(callback_func: Callable, RECORD: bool = True, status_callback: Callab
                 time.sleep(t_c / 2 / perf_o)
                 callback("Found confirmation tone")
                 if stream.get_current_input_hz() == c_tone:
-                    time.sleep(t_c / perf_o)
+                    time.sleep(t_c / 2 / perf_o)
                     callback("Confirmation tone confirmed!")
                     message_type = stream.get_current_input_hz()
                     callback("Message type recieved!")
@@ -218,7 +226,7 @@ def listen(callback_func: Callable, RECORD: bool = True, status_callback: Callab
                             callback
                         )
                     else:
-                        time.sleep(t_c / 2 / perf_o)
+                        time.sleep(t_c / perf_o)
                         streaming(
                             c_tone,
                             h_tone,
@@ -227,7 +235,8 @@ def listen(callback_func: Callable, RECORD: bool = True, status_callback: Callab
                             time_out,
                             perf_o,
                             callback_func,
-                            callback
+                            callback,
+                            partition
                         )
                     stream.LISTENING = False
                     LISTENING = False

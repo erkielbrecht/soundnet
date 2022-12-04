@@ -41,7 +41,7 @@ def callback(header, data):
     if not header and not data:
         http_status = 'Starting listening.'
         # Listening.
-        time.sleep(0.2)
+        time.sleep(0.1)
         ls.listen(callback, status_callback=set_status)
     else:
         if header != 'DNS':
@@ -76,7 +76,8 @@ def callback(header, data):
             http_status = f'Got an DNS response and requesting ip {data}!'
             if data:
                 ip = data
-                os.mkdir(f'assets/http/{ip}')
+                if not(os.path.exists(f'assets/http/{ip}')):
+                    os.mkdir(f'assets/http/{ip}')
                 if os.listdir(f'assets/http/{ip}'):
                     file = open(f'assets/http/{ip}/head.txt')
                     header = {i.split('=')[0]: i.split('=')[1] for i in file.read().split(';')}
@@ -87,17 +88,17 @@ def callback(header, data):
                                                                                                 "%Y-%m-%d %H:%M"):
                             wb.open('file://' + os.path.abspath(f'assets/http/{ip}/' + header['Files'][0]), new=2)
 
-                        else:
-                            em.emit(callback,
-                                    # The type of request
-                                    'http',
-                                    # Using the set method
-                                    METHOD,
-                                    # The user input
-                                    ip,
-                                    # Callback for client status
-                                    status_callback=set_status
-                                    )
+                else:
+                    em.emit(callback,
+                            # The type of request
+                            'http',
+                            # Using the set method
+                            METHOD,
+                            # The user input
+                            ip,
+                            # Callback for client status
+                            status_callback=set_status
+                            )
             else:
                 http_status = 'Sorry but the requested webpage could not be found.'
 
