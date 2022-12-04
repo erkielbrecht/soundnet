@@ -7,7 +7,7 @@ def get(cat, key):
     conf.close()
     try:
         return data[cat][key]
-    finally:
+    except:
         print("Config missing value error: Key '" + str(key) + "' does not exist.")
         return ""
 
@@ -18,6 +18,6 @@ def get_cat(cat):
     conf.close()
     try:
         return data[cat]
-    finally:
+    except:
         print("Config missing value error: Category '" + str(cat) + "' does not exist.")
         return ""

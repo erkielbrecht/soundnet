@@ -14,7 +14,7 @@ title = "soundnet"
 # How many sound channels to use
 "channels" = 1
 # How many notes a second to play
-"tone_speed" = 0.1
+"tone_speed" = 0.03
 # How long should confirm tones last
 "confirm_speed" = 1
 # Expected recieve volume
@@ -36,9 +36,23 @@ tone_difference = 100
 
 [protocols]
 "400" = "test_stream"
+"500" = "http"
+"600" = "dns"
 
 [test_stream]
 # Recognition of the protocol type
 type_tone = 400
+# Listening type (streaming, record)
+list_type = "record"
+
+[http]
+# Recognition of the protocol type
+type_tone = 500
+# Listening type (streaming, record)
+list_type = "record"
+
+[dns]
+# Recognition of the protocol type
+type_tone = 600
 # Listening type (streaming, record)
 list_type = "record"

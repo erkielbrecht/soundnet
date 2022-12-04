@@ -32,7 +32,6 @@ def process_recording(record_data, c_tone, h_tone, t, t_c, p_list, callback_func
     for i in record_data:
         vol, hz = extract_values(i[0])
         data_list.append([hz, i[1] / SPS])
-
     data_list_merged = [data_list[0]]
     for i in range(1, len(data_list)):
         if data_list_merged[-1][0] == data_list[i][0]:
@@ -48,7 +47,7 @@ def process_recording(record_data, c_tone, h_tone, t, t_c, p_list, callback_func
                 i[0] != 0 and
                 str(i[0]) not in p_list and
                 not header_found):
-            for j in range(int(round(round(i[1], 1) / t, 0))):
+            for j in range(int(round(round(i[1], 2) / t, 0))):
                 header.append(i[0])
         if i[0] == h_tone and round(i[1], 0) == t_c:
             header_found = True
@@ -57,7 +56,7 @@ def process_recording(record_data, c_tone, h_tone, t, t_c, p_list, callback_func
                 i[0] != 0 and
                 str(i[0]) not in p_list and
                 header_found):
-            for j in range(int(round(round(i[1], 1) / t, 0))):
+            for j in range(int(round(round(i[1], 2) / t, 0))):
                 data.append(i[0])
 
     # data_list_cleaned = []
@@ -130,8 +129,12 @@ def record(
     stream.sound_buffer = np.array([0])
 
     # Wait til the confirmation tone
-    while stream.get_current_input_hz() != c_tone:
-        time.sleep(0.1)
+    while True:
+        while stream.get_current_input_hz() != c_tone:
+            time.sleep(0.1)
+        time.sleep(t_c/2)
+        if stream.get_current_input_hz() == c_tone:
+            break
 
     callback("Ending recording.")
     stream.RECORDING = False
@@ -171,9 +174,11 @@ def streaming(
                 break
 
 
-def listen(callback_func: Callable, RECORD: bool = True, status_callback: Callable = None):
+def listen(callback_func: Callable, RECORD: bool = True, status_callback: Callable = lambda *args: None,
+           server_type_callback: Callable = lambda *args: None):
     global LISTENING
     LISTENING = True
+    print('rfkmferokmfeo')
 
     c_tone = int(config.get("sound", "confirm_tone"))
     h_tone = int(config.get("sound", "header_tone"))
@@ -193,6 +198,7 @@ def listen(callback_func: Callable, RECORD: bool = True, status_callback: Callab
         data = []
         stream.LISTENING = True
         while LISTENING:
+            time.sleep(0.01)
             if stream.get_current_input_hz() == c_tone:
                 time.sleep(t_c / 2 / perf_o)
                 callback("Found confirmation tone")
@@ -201,6 +207,7 @@ def listen(callback_func: Callable, RECORD: bool = True, status_callback: Callab
                     callback("Confirmation tone confirmed!")
                     message_type = stream.get_current_input_hz()
                     callback("Message type recieved!")
+                    server_type_callback(message_type)
                     if RECORD:
                         record(
                             c_tone,
