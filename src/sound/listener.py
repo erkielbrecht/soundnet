@@ -154,14 +154,17 @@ def streaming(
         perf_o,
         callback_func,
         callback,
-        partition):
+        partition,
+        p_list):
     t_o = 0
     while stream.get_current_input_hz() != h_tone and t_o < time_out:
-        header.append(stream.get_current_input_hz())
+        if stream.get_current_input_hz() not in p_list:
+            header.append(stream.get_current_input_hz())
         time.sleep(t / perf_o)
         t_o += t
         if stream.get_current_input_hz() == h_tone:
             callback("Header recieved!")
+            print('Header: ', header)
             time.sleep(t_c / perf_o)
             t_o = 0
             callback_func(dict.freq_to_test(header), '')
@@ -236,7 +239,8 @@ def listen(callback_func: Callable, RECORD: bool = True, status_callback: Callab
                             perf_o,
                             callback_func,
                             callback,
-                            partition
+                            partition,
+                            p_list
                         )
                     stream.LISTENING = False
                     LISTENING = False

@@ -69,12 +69,12 @@ def callback(header, data):
                 http_status = 'Received a bodiless response.'
                 header_string = ""
                 for i in header:
-                    header_string += i+':', header[i]+'\n'
+                    header_string += i+': '+str(header[i])+'\n'
                 head_response = f'Headers for {ip}\n'+header_string
 
         elif header == 'DNS':
             http_status = f'Got an DNS response and requesting ip {data}!'
-            if data:
+            if data and METHOD != 'HEAD':
                 ip = data
                 if not(os.path.exists(f'assets/http/{ip}')):
                     os.mkdir(f'assets/http/{ip}')
@@ -85,7 +85,7 @@ def callback(header, data):
                     file.close()
                     if 'Expires' in header:
                         if datetime.now().replace(second=0, microsecond=0) <= datetime.strptime(header['Expires'],
-                                                                                                "%Y-%m-%d %H:%M"):
+                                                                                                "%Y-%m-%d %H:%M:%S"):
                             wb.open('file://' + os.path.abspath(f'assets/http/{ip}/' + header['Files'][0]), new=2)
 
                 else:
@@ -99,6 +99,18 @@ def callback(header, data):
                             # Callback for client status
                             status_callback=set_status
                             )
+            elif data and METHOD == 'HEAD':
+                ip = data
+                em.emit(callback,
+                        # The type of request
+                        'http',
+                        # Using the set method
+                        METHOD,
+                        # The user input
+                        ip,
+                        # Callback for client status
+                        status_callback=set_status
+                        )
             else:
                 http_status = 'Sorry but the requested webpage could not be found.'
 
@@ -127,9 +139,24 @@ def listen(event, values, window):
         window['-HEAD-'].update(head_response)
 
     if event == 'Request':
-        http_status = 'Resolving the "IP" for the address', values[0]
+        http_status = str('Resolving the "IP" for the address', values[0])
         # Using the GET method for a normal request with body
         METHOD = 'GET'
+        # Initiates a dns request for the website
+        em.emit(callback,
+                # The type of request
+                'dns',
+                # Since we're requesting a webpage we want to resolve for A type record
+                'A',
+                # The user input
+                values[0],
+                # Callback for client status
+                status_callback=set_status
+                )
+    if event == 'Request HEAD':
+        http_status = 'Resolving the "IP" for the address', values[0]
+        # Using the GET method for a normal request with body
+        METHOD = 'HEAD'
         # Initiates a dns request for the website
         em.emit(callback,
                 # The type of request

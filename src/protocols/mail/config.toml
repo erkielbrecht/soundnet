@@ -18,9 +18,9 @@ title = "soundnet"
 # How long should confirm tones last
 "confirm_speed" = 1
 # Expected recieve volume
-"r_volume" = 0.5
+"r_volume" = 1
 # Seconds until listening times out
-"time_out" = 200
+"time_out" = 20
 # Performance multiplier (Must be calibrated per computer)
 "performance_overhead" = 1.0
 # To which character round the data to
@@ -35,36 +35,10 @@ tone_baseline = 1000
 tone_difference = 100
 
 [protocols]
-"300" = "test_stream"
-"500" = "http"
-"600" = "dns"
-"400" = "stream"
+"400" = "test_stream"
 
 [test_stream]
 # Recognition of the protocol type
-type_tone = 300
-# Listening type (streaming, record)
-list_type = "record"
-
-[http]
-# Recognition of the protocol type
-type_tone = 500
-# Listening type (streaming, record)
-list_type = "record"
-# Time to wait before emitting message
-wait_time = 1
-# How long until a website expires (Minutes)
-expire = 2
-
-
-[dns]
-# Recognition of the protocol type
-type_tone = 600
-# Listening type (streaming, record)
-list_type = "record"
-# Time to wait before emitting message
-wait_time = 1
-
-[stream]
-# Recognition of the protocol type
 type_tone = 400
+# Listening type (streaming, record)
+list_type = "record"
