@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append('../../../src')
 import sound.stream as stream
 import sound.emitter as em
@@ -13,21 +14,21 @@ stream.start_stream()
 initial_listen = True
 
 # Things to receive
-valid_commands = ['FR', 'TO', 'DT']     # Known with data
-parameters = ["", "", []]               # Parameters for each valid command
+valid_commands = ['FR', 'TO', 'DT']  # Known with data
+parameters = ["", "", []]  # Parameters for each valid command
 required_commands = valid_commands[:3]  # What it still needs, the non-sound version would use it sometimes
 
 # Retry variables
 actively_listening = False  # Whether it is actually listening to a signal not just waiting for a header tone
-retry = False               # Whether an error was encountered and retrying is active
-retry_attempts = 0          # How many times retried to send but got no response (will stop after 3 retries)
-hard_retry_attempts = 0     # Includes getting back errors as retries (will stop after 10 retries)
+retry = False  # Whether an error was encountered and retrying is active
+retry_attempts = 0  # How many times retried to send but got no response (will stop after 3 retries)
+hard_retry_attempts = 0  # Includes getting back errors as retries (will stop after 10 retries)
 
 # Timeout variables
-counting = False        # Whether to count (not counting during for example actually listening to a signal or emitting)
-time_count_in_ms = 0    # Current process time
-time_limit_in_s = 10    # How long to wait before timeout
-status = ""             # Last sent message (for retransmits)
+counting = False  # Whether to count (not counting during for example actually listening to a signal or emitting)
+time_count_in_ms = 0  # Current process time
+time_limit_in_s = 10  # How long to wait before timeout
+status = ""  # Last sent message (for retransmits)
 
 
 # Exits the program
@@ -109,12 +110,12 @@ def callback(header=None, data=None):
     global time_count_in_ms, counting
     global initial_listen
 
-    time_count_in_ms = 0    # Timer is reset since received something as it was called back
+    time_count_in_ms = 0  # Timer is reset since received something as it was called back
     if f"{header} {data}" == status:  # heard its own error message (don't know how else to do it yet XD
         return
 
     if header is None:  # Means it is listening
-        if retry:   # It will start another retry attempt if it is listening for a reply after retrying
+        if retry:  # It will start another retry attempt if it is listening for a reply after retrying
             retry_attempts += 1
             t.Thread(target=timeout).start()
         else:
@@ -124,25 +125,25 @@ def callback(header=None, data=None):
                 initial_listen = False
         counting = True
         ls.listen(callback_func=callback, status_callback=listener_status)
-    else:   # Heard something
+    else:  # Heard something
         print(f"Received request from client: {header} {data}")
 
-        if header not in valid_commands + ['EX', 'ML', 'DN', 'AC']:     # Unknown command received from server
+        if header not in valid_commands + ['EX', 'ML', 'DN', 'AC']:  # Unknown command received from server
             retry = True
             status = "11 Unknown command"
             print("Sending: 11 Unknown command")
             em.emit(callback_func=callback, type="test_stream", header="11", data="Unknown command",
                     status_callback=listener_status)
-        else:   # Got valid command
+        else:  # Got valid command
             retry = False
             retry_attempts = 0
             status = ""
             if header == "ML":  # Request to start communication
-                print("Sending: SD ")   # Ask client to send data
+                print("Sending: SD ")  # Ask client to send data
                 em.emit(callback_func=callback, type="test_stream", header="SD", data="",
                         status_callback=listener_status)
 
-            elif header == "EX":    # Asked to exit
+            elif header == "EX":  # Asked to exit
                 sender = parameters[0].split(" ")[0]
                 recipient = parameters[1]
                 sbject = "".join(parameters[2]).split("\n\n")[0]
@@ -153,31 +154,31 @@ def callback(header=None, data=None):
                        f"\n{text}"
                 with open("received_mail.txt", "w") as f:
                     f.write(text)
-                print("Sending: QT ")   # Tell client to quit
+                print("Sending: QT ")  # Tell client to quit
                 em.emit(callback_func=suicide, type="test_stream", header="QT", data="",
                         status_callback=listener_status)
 
-            elif header == "DT":    # Got sent data (appends, so it can be sent by lines for example)
+            elif header == "DT":  # Got sent data (appends, so it can be sent by lines for example)
                 required_commands.pop(required_commands.index('DT'))
                 parameters[2].append(data)
                 print("Sending: OK ")
                 em.emit(callback_func=callback, type="test_stream", header="OK", data="",
                         status_callback=listener_status)
 
-            elif header in ['FR', 'TO']:    # Gets sent author or recipient
+            elif header in ['FR', 'TO']:  # Gets sent author or recipient
                 parameters[valid_commands.index(header)] = data
                 required_commands.pop(required_commands.index(header))
                 print("Sending: OK ")
                 em.emit(callback_func=callback, type="test_stream", header="OK", data="",
                         status_callback=listener_status)
 
-            elif header == "DN":    # Asked to transmit through the internet
-                print("Sending: WT ")   # Tells client to wait (so it doesn't time out and retransmit needlessly)
+            elif header == "DN":  # Asked to transmit through the internet
+                print("Sending: WT ")  # Tells client to wait (so it doesn't time out and retransmit needlessly)
                 em.emit(callback_func=callback, type="test_stream", header="WT", data="",
                         status_callback=listener_status)
 
-            elif header == "AC":    # Asked to send back reply after sending
-                try:    # Tries sending email through SMTP
+            elif header == "AC":  # Asked to send back reply after sending
+                try:  # Tries sending email through SMTP
                     sender = parameters[0].split(" ")[0]
                     password = parameters[0].split(" ")[1]
                     recipient = parameters[1]

@@ -1,6 +1,9 @@
-import toml
 import time
+
+import toml
+
 import config
+
 
 def callback(header, data, server_listen, server_emit):
     records = open('src/protocols/dns/records.toml')

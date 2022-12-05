@@ -132,7 +132,7 @@ def record(
     while True:
         while stream.get_current_input_hz() != c_tone:
             time.sleep(0.1)
-        time.sleep(t_c/2)
+        time.sleep(t_c / 2)
         if stream.get_current_input_hz() == c_tone:
             break
 

@@ -1,9 +1,9 @@
 import PySimpleGUI as sg
 
 import config
-import protocols.test_stream.client as ts_client
 import protocols.http.client as http_client
 import protocols.stream.client as stream_client
+import protocols.test_stream.client as ts_client
 import sound.stream as stream
 
 
@@ -35,7 +35,8 @@ def run():
             MODE = event
 
         if event == "Http":
-            new_window = sg.Window('Soundnet ' + config.get("main", "version"), http_client.get_layout(), size=(300, 300),
+            new_window = sg.Window('Soundnet ' + config.get("main", "version"), http_client.get_layout(),
+                                   size=(300, 300),
                                    element_justification='c', finalize=True)
             window.close()
             window = new_window
@@ -44,7 +45,8 @@ def run():
             MODE = event
 
         if event == "Stream":
-            new_window = sg.Window('Soundnet ' + config.get("main", "version"), stream_client.get_layout(), size=(300, 300),
+            new_window = sg.Window('Soundnet ' + config.get("main", "version"), stream_client.get_layout(),
+                                   size=(300, 300),
                                    element_justification='c', finalize=True)
             window.close()
             window = new_window

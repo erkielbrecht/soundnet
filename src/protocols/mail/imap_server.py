@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append('../../../src')
 import sound.stream as stream
 import sound.emitter as em
@@ -113,20 +114,20 @@ password = ""
 initial_listen = True
 
 # Timeout variables
-time_limit_in_s = 5     # How long to wait for a response
-time_count_in_ms = 0    # Current process time
-counting = False        # Whether to count (not counting during for example actually listening to a signal or emitting)
+time_limit_in_s = 5  # How long to wait for a response
+time_count_in_ms = 0  # Current process time
+counting = False  # Whether to count (not counting during for example actually listening to a signal or emitting)
 
 # Variables
-clientReady = False     # No use yet, when client said it is ready to receive data
+clientReady = False  # No use yet, when client said it is ready to receive data
 
 # Retry variables
-last_header = ""            # Last header sent (for retransmissio)
-last_content = ""           # Last content sent (for retransmissio)
+last_header = ""  # Last header sent (for retransmissio)
+last_content = ""  # Last content sent (for retransmissio)
 actively_listening = False  # Whether actually listening, so it doesn't count then
-retry = False               # Whether an error was encountered and retrying is active
-retry_attempts = 0          # How many times retried to send but got no response (will stop after 3 retries)
-hard_retry_attempts = 0     # Includes getting back errors as retries (will stop after 10 retries)
+retry = False  # Whether an error was encountered and retrying is active
+retry_attempts = 0  # How many times retried to send but got no response (will stop after 3 retries)
+hard_retry_attempts = 0  # Includes getting back errors as retries (will stop after 10 retries)
 
 
 # Exits the program
@@ -207,22 +208,22 @@ def callback(header=None, data=None):
     global clientReady
     global username, password
 
-    time_count_in_ms = 0    # Timer is reset since received something as it was called back
+    time_count_in_ms = 0  # Timer is reset since received something as it was called back
     if (header, data) == (last_header, last_content):  # heard its own error message
         return
 
     if header is None:  # Means it is listening
-        if retry:   # It will start another retry attempt
+        if retry:  # It will start another retry attempt
             retry_attempts += 1
             t.Thread(target=timeout).start()
-        else:   # It will start global timetou (which exits if retry emitting is done)
+        else:  # It will start global timetou (which exits if retry emitting is done)
             if not initial_listen:  # Not on initial listen because then it's liek a server just listens forever
                 t.Thread(target=global_timeout).start()
             else:
                 initial_listen = False
         counting = True
         ls.listen(callback_func=callback, status_callback=listener_status)
-    else:   # Heard something
+    else:  # Heard something
         print(f"Received request from client: {header} {data}")
 
         if header not in ['FT', 'AR', 'RV', 'EX']:  # Not in valid commands
@@ -232,7 +233,7 @@ def callback(header=None, data=None):
             print("Sending: 11 Unknown command")
             em.emit(callback_func=callback, type="test_stream", header="11", data="Unknown command",
                     status_callback=listener_status)
-        else:   # Received valid command
+        else:  # Received valid command
             retry = False
             retry_attempts = 0
             last_header, last_content = "", ""
@@ -242,13 +243,13 @@ def callback(header=None, data=None):
                 username = data.split(" ")[0]
                 password = data.split(" ")[1]
 
-                print("Sending: WT ")   # Asks client to wait
+                print("Sending: WT ")  # Asks client to wait
                 last_header = "WT"
                 last_content = ""
                 em.emit(callback_func=callback, type="test_stream", header="WT", data="",
                         status_callback=listener_status)
 
-            elif header == "AR":    # Client is waiting, can fetch email through imap
+            elif header == "AR":  # Client is waiting, can fetch email through imap
                 clientReady = True
                 try:
                     # Gets latest email

@@ -1,10 +1,10 @@
-import PySimpleGUI as sg
-import webbrowser as wb
 import os
 import time
+import webbrowser as wb
 from datetime import datetime
 
-import config
+import PySimpleGUI as sg
+
 import sound.emitter as em
 import sound.listener as ls
 import sound.stream as sound_stream
@@ -60,23 +60,23 @@ def callback(header, data):
                 header['Files'] = header['Files'].split(' ')
                 print(header)
                 for j, i in enumerate(header['Files']):
-                    file = open(f'assets/http/{ip}/'+i, 'w')
+                    file = open(f'assets/http/{ip}/' + i, 'w')
                     file.write(data[j])
                     file.close()
-                wb.open('file://'+os.path.abspath(f'assets/http/{ip}/'+header['Files'][0]), new=2)
+                wb.open('file://' + os.path.abspath(f'assets/http/{ip}/' + header['Files'][0]), new=2)
 
             else:
                 http_status = 'Received a bodiless response.'
                 header_string = ""
                 for i in header:
-                    header_string += i+': '+str(header[i])+'\n'
-                head_response = f'Headers for {ip}\n'+header_string
+                    header_string += i + ': ' + str(header[i]) + '\n'
+                head_response = f'Headers for {ip}\n' + header_string
 
         elif header == 'DNS':
             http_status = f'Got an DNS response and requesting ip {data}!'
             if data and METHOD != 'HEAD':
                 ip = data
-                if not(os.path.exists(f'assets/http/{ip}')):
+                if not (os.path.exists(f'assets/http/{ip}')):
                     os.mkdir(f'assets/http/{ip}')
                 if os.listdir(f'assets/http/{ip}'):
                     file = open(f'assets/http/{ip}/head.txt')
